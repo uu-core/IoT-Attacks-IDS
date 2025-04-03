@@ -37,6 +37,9 @@
 #include "app-message.h"
 //#include "icmp6-stats.h"
 #include "network-attacks.h"
+#include "net/ipv6/uiplib.h" //EDIT
+//#include "rpl_of0_worst.h"
+
 #if ROUTING_CONF_RPL_LITE
 #include "net/routing/rpl-lite/rpl.h"
 #include "net/routing/rpl-lite/rpl-timers.h"
@@ -53,15 +56,19 @@
 #define WITH_SERVER_REPLY  1
 #define UDP_CLIENT_PORT	8765
 #define UDP_SERVER_PORT	5678
+#define NODE_TO_NODE_PORT 8766  // New port for node-to-node communication
 
 #define SEND_INTERVAL		  (60 * CLOCK_SECOND)
+#define NORMAL_TRAFFIC_MAX_INTERVAL (180 * CLOCK_SECOND) //EDIT: Maximum delay between packets
 #define SHOW_ENERGEST             (0 && ENERGEST_CONF_ON)
 
 static struct simple_udp_connection udp_conn;
+static struct simple_udp_connection node_to_node_conn;
 
 /*---------------------------------------------------------------------------*/
 PROCESS(udp_client_process, "UDP client");
-AUTOSTART_PROCESSES(&udp_client_process);
+PROCESS(normal_udp_traffic_process, "Normal UDP traffic"); //EDIT
+AUTOSTART_PROCESSES(&udp_client_process, &normal_udp_traffic_process); //EDIT
 /*---------------------------------------------------------------------------*/
 static void
 udp_rx_callback(struct simple_udp_connection *c,
@@ -84,6 +91,69 @@ udp_rx_callback(struct simple_udp_connection *c,
   LOG_INFO_(" LLSEC LV:%d", uipbuf_get_attr(UIPBUF_ATTR_LLSEC_LEVEL));
 #endif
   LOG_INFO_("\n");
+}
+
+static void
+udp_node_to_node_callback(struct simple_udp_connection *c,
+         const uip_ipaddr_t *sender_addr,
+         uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr,
+         uint16_t receiver_port,
+         const uint8_t *data,
+         uint16_t datalen)
+{
+  int *msg = (int *)data;
+  uint8_t hop_limit = UIP_IP_BUF->ttl; // Get remaining hop limit from IPv6 header
+
+  LOG_INFO("HOPCOUNTMSG ");
+  if(datalen != sizeof(int)) {
+    LOG_INFO_("unknown data of size %u from ", datalen);
+  } else {
+    LOG_INFO_("Data: %u", *msg); // Print received uint8_t data
+  }
+  LOG_INFO_(" from ");
+  LOG_INFO_6ADDR(sender_addr);
+
+  LOG_INFO_(", Hop Count: %u", (64 - hop_limit));
+
+#if LLSEC802154_CONF_ENABLED
+  LOG_INFO_(", LLSEC LV:%d", uipbuf_get_attr(UIPBUF_ATTR_LLSEC_LEVEL));
+#endif
+  LOG_INFO_("\n");
+}
+
+/*---------------------------------------------------------------------------*/
+
+// List of known nodes (hardcoded for simplicity)
+static char *node_ip_list[] = {
+  "fd00::201:1:1:1", 
+  "fd00::202:2:2:2",
+  "fd00::203:3:3:3",
+  "fd00::204:4:4:4",
+  "fd00::205:5:5:5",
+  "fd00::206:6:6:6",
+  "fd00::207:7:7:7",
+  "fd00::208:8:8:8",
+  "fd00::209:9:9:9",
+  "fd00::20a:a:a:a",
+  "fd00::20b:b:b:b",
+  "fd00::20c:c:c:c",
+  "fd00::20d:d:d:d",
+  "fd00::20e:e:e:e",
+  "fd00::20f:f:f:f",
+  "fd00::210:10:10:10",
+  "fd00::211:11:11:11",
+  "fd00::212:12:12:12",
+  "fd00::213:13:13:13",
+  "fd00::214:14:14:14",
+  "fd00::215:15:15:15"
+};
+
+// Function to get a random IP address
+static char* get_random_node_ip(uip_ipaddr_t *dest_ipaddr) {
+  //int random_index = random_rand() % num_of_motes_including_sink;
+  uiplib_ipaddrconv(node_ip_list[0], dest_ipaddr); //random index
+  return node_ip_list[0]; //random index
 }
 /*---------------------------------------------------------------------------*/
 #if SHOW_ENERGEST
@@ -179,3 +249,41 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
+/* Normal Traffic Simulation Process */
+//ALL BELOW IS EDIT
+PROCESS_THREAD(normal_udp_traffic_process, ev, data)
+{
+  static struct etimer normal_traffic_timer;
+  int payload = get_of_counter();
+  //uint8_t payload = 1;
+  uip_ipaddr_t dest_ip;
+  char* str_addr = NULL;
+
+  PROCESS_BEGIN();
+
+  simple_udp_register(&node_to_node_conn, NODE_TO_NODE_PORT, NULL,
+    NODE_TO_NODE_PORT, udp_node_to_node_callback);
+
+  etimer_set(&normal_traffic_timer, random_rand() % NORMAL_TRAFFIC_MAX_INTERVAL);
+
+  while(1) {
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&normal_traffic_timer));
+
+    str_addr = get_random_node_ip(&dest_ip);
+    payload = get_of_counter();
+      if(str_addr != NULL) {
+        LOG_INFO("Sending HOPCOUNTMSG message to sink\n");
+        //LOG_INFO_("\n");
+
+        simple_udp_sendto(&node_to_node_conn, &payload, sizeof(int), &dest_ip);
+      }
+      else {
+      LOG_INFO("No known routes, skipping normal traffic\n");
+    }
+
+    uint16_t next_interval = (random_rand() % NORMAL_TRAFFIC_MAX_INTERVAL) + CLOCK_SECOND;
+    etimer_set(&normal_traffic_timer, next_interval);
+  }
+
+  PROCESS_END();
+}
