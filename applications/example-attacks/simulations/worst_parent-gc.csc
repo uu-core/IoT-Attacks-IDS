@@ -182,30 +182,6 @@ for(var wthid = 1; wthid &lt; clients + 2; wthid++) { /*assumes sink has id 1*/
   setInt16(sim.getMoteWithID(wthid), 'num_of_motes_including_sink', clients + 1);
 }
 
-function decrementInt16(mote, name, value) { /* decrement by 1 if currently larger than value */
-  var mem = new org.contikios.cooja.mote.memory.VarMemory(mote.getMemory());
-  if (!mem.variableExists(name)) {
-    log.log("ERR: could not find variable '" + name + "'\n");
-    return false;
-  }
-  var symbol = mem.getVariable(name);
-  var oldValue = mem.getInt16ValueOf(symbol.addr) &amp; 0xffff;
-  if (oldValue &gt; value) {
-    mem.setInt16ValueOf(symbol.addr, (oldValue - 1));
-  }
-  else {
-    log.log("FALSE\n");
-    log.log("Old: " + oldValue + " Value: " + value + "\n")
-    return false;
-  }
-  if (verbose) {
-    var oldValue = mem.getInt16ValueOf(symbol.addr) &amp; 0xffff;
-    log.log("Set int16 " + name + " (address 0x" + java.lang.Long.toHexString(symbol.addr)
-            + "/" + symbol.size + ": " + (oldValue - 1) + ") to " + value + "\n");
-  }
-  return true;
-}
-
 function selectAttacker() {
   var sink = sim.getMoteWithID(sinkId);
   var sinkRadio = sink.getInterfaces().getRadio();
@@ -263,11 +239,12 @@ GENERATE_MSG(5000, "continue"); //wait for rank
 YIELD_THEN_WAIT_UNTIL(msg.equals("continue"));
 
 GENERATE_MSG(27000000, "done");
+GENERATE_MSG(20000, "decrease-rank");
 
 while(true) {
     YIELD();
     if (msg.equals("decrease-rank")) {
-      decrementInt16(attacker, 'network_attacks_rpl_dio_fake_rank', 128);
+      setBool(attacker, 'network_attacks_decrement_fake_rank', true);
       log.log("Decreasing rank on node " + attacker.getID() + "!\n");
       GENERATE_MSG(20000, "decrease-rank"); //once every 20 sec
     }

@@ -182,6 +182,12 @@ bool network_attacks_worst_parent = false;
 bool network_attacks_fake_rank_as_current_rank = false;
 
 /*
+ * Used to decrement fake rank
+ */
+
+bool network_attacks_decrement_fake_rank = false;
+
+/*
  * local repair
  */
 bool network_attacks_local_repair = false;
@@ -264,6 +270,14 @@ set_fake_rank_to_current_rank(void) {
 
 /*---------------------------------------------------------------------------*/
 static void
+decrement_fake_rank(void) {
+  if (network_attacks_rpl_dio_fake_rank > 128) {
+    network_attacks_rpl_dio_fake_rank -= 1;
+  }
+}
+
+/*---------------------------------------------------------------------------*/
+static void
 check_config(void *ptr)
 {
   if(current_fake_id != network_attacks_fake_id) {
@@ -283,6 +297,11 @@ check_config(void *ptr)
 
   if(network_attacks_fake_rank_as_current_rank) {
     set_fake_rank_to_current_rank();
+  }
+
+  if(network_attacks_decrement_fake_rank) {
+    decrement_fake_rank();
+    network_attacks_decrement_fake_rank = false;
   }
 
   if(network_attacks_rpl_dag_version_bump) {
