@@ -9,7 +9,7 @@ def randomize_positions(csc_file, num_nodes):
     if len(parts) != 2:
         raise ValueError("Invalid filename format. Expected format: Y-Z.csc")
     
-    output_dir = os.path.join("../scenarios",parts[0], parts[1], str(num_nodes))
+    output_dir = os.path.join("../applications/example-attacks/scenarios",parts[0], str(num_nodes), parts[1])
     os.makedirs(output_dir, exist_ok=True)
     
     points_file = f"generated_points-lr-{num_nodes}.json"
@@ -88,8 +88,8 @@ def randomize_positions(csc_file, num_nodes):
 
 if __name__ == "__main__":
     num_nodes = [5, 10, 15, 20]
-    files = [#"../applications/example-attacks/simulations/local_repair-base.csc",
-             #"../applications/example-attacks/simulations/local_repair-oo.csc",
+    files = ["../applications/example-attacks/simulations/local_repair-base.csc",
+             "../applications/example-attacks/simulations/local_repair-oo.csc",
              "../applications/example-attacks/simulations/local_repair-gc.csc"
              #"../applications/example-attacks/simulations/worst_parent-base.csc",
              #"../applications/example-attacks/simulations/worst_parent-oo.csc",
