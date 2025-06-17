@@ -13,6 +13,7 @@ ATTACK_PREFIXES = {
 
 BASE_PATH = "../applications/example-attacks/simulations"
 SCENARIO_PATH = "../applications/example-attacks/scenarios"
+OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 VARIANTS = ["base", "oo", "gc"]  # Suffixes to append
 
 def get_attack_prefix(filename):
@@ -34,7 +35,7 @@ def randomize_positions(csc_file, num_nodes):
     os.makedirs(output_dir, exist_ok=True)
 
     prefix = get_attack_prefix(input_filename)
-    points_file = f"generated_points-{prefix}-{num_nodes}.json"
+    points_file = os.path.join(OUTPUT_PATH, f"generated_points-{prefix}-{num_nodes}.json")
     
     with open(points_file, 'r') as f:
         all_positions = json.load(f)

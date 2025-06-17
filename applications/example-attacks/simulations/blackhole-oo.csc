@@ -254,7 +254,8 @@ while(i != 500) {
 
     log.log("network blackkhole attack from " + attacker.getID() + "!\n");
     sim.getEventCentral().logEvent("attack", "blackhole:" + attacker.getID());
-    write(attacker, "attack");
+    setInt16(attacker, 'network_attacks_udp_drop_rate, 100);
+    setBool(attacker, 'network_attacks_udp_drop_fwd', true);
 
     // STOP ATTACK AFTER MINUTES 20
     GENERATE_MSG(rInt, "stop-attack");
@@ -262,7 +263,7 @@ while(i != 500) {
 
     log.log("network blackkhole attack STOPPED from " + attacker.getID() + "!\n");
     sim.getEventCentral().logEvent("stop-attack", "blackhole:" + attacker.getID());
-    write(attacker, "stop-attack");
+    setBool(attacker, 'network_attacks_udp_drop_fwd', false);
     
     i++;
 }

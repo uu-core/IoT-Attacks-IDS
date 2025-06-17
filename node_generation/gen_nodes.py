@@ -2,6 +2,10 @@ import random
 import math
 import json
 from collections import deque
+import sys
+import ast
+import os
+
 def generate_connected_points(num, max_retries=100):
     for retry in range(max_retries):
         # Maximum number of neighbors allowed per point
@@ -113,8 +117,25 @@ def save_points_to_file(filename, num_nodes, num_samples=20):
     print(f"Saved {num_samples} sets of points to {filename}")
 
 if __name__ == "__main__":
-    num_nodes = int(input("Enter number of nodes: "))
-    save_points_to_file(f"generated_points-lr-{num_nodes}.json", num_nodes)
-    save_points_to_file(f"generated_points-wp-{num_nodes}.json", num_nodes)
-    save_points_to_file(f"generated_points-bh-{num_nodes}.json", num_nodes)
-    save_points_to_file(f"generated_points-df-{num_nodes}.json", num_nodes)
+    if len(sys.argv) < 2:
+        print("Usage: python3 program.py [5,10,15]")
+        sys.exit(1)
+
+    try:
+        # Parse argument safely as list of integers
+        node_list = ast.literal_eval(sys.argv[1])
+        if not isinstance(node_list, list) or not all(isinstance(n, int) for n in node_list):
+            raise ValueError
+    except:
+        print("Error: Argument must be a list of integers. Example: [5,10,15]")
+        sys.exit(1)
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the current script
+    output_dir = os.path.join(script_dir, "output")
+    os.makedirs(output_dir, exist_ok=True)
+
+    for num_nodes in node_list:
+        save_points_to_file(os.path.join(output_dir, f"generated_points-lr-{num_nodes}.json"), num_nodes)
+        save_points_to_file(os.path.join(output_dir, f"generated_points-wp-{num_nodes}.json"), num_nodes)
+        save_points_to_file(os.path.join(output_dir, f"generated_points-bh-{num_nodes}.json"), num_nodes)
+        save_points_to_file(os.path.join(output_dir, f"generated_points-df-{num_nodes}.json"), num_nodes)
