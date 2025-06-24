@@ -70,10 +70,34 @@ This folder automates the generation of scenarios.
 
 ---
 
+## Example Run
+
+1. Navigate to the `node_generation/` folder and run the files `gen_nodes.py` and `insert_nodes.py`
+```console
+$ cd node_generation
+$ python3 gen_nodes.py "[5, 10, 15, 20]"
+$ python3 insert_nodes.py
+```
+This will have created the `applications/example-attacks/scenarios/` folder which contains all of the generated .csc files
+
+2. To run the experiments, use the `run-experiments.sh` script. By default it will run all generated .csc files below `applications/example-attacks/scenarios/`, you can also specify if you want to run a specific attack/size/variations by using the arguments --attack --size --variation .\
+The command:
+```console
+$ ./run-experiments.sh --attack blackhole
+```
+will run all the blackhole scenarios.\
+The command:
+```console
+$ ./run-experiments.sh --size 10 --variation base
+```
+will run the scenarios of size 10 and of the base variation. \
+Note that the arguments must match the folder names under the `applications/example-attacks/scenarios/` folder.
+
+3. The outputs of the experiments are placed under `applications/example-attacks/scenarios_output/` with the same folder structure as `applications/example-attacks/scenarios/`
 ## Extending the Codebase
 
 ### Adding a New Attack
-
+TODO \
 1. **Create a new `.c` file** in `services/` implementing your attack logic.
 2. Add a runtime check for your attack's control flag:
 
