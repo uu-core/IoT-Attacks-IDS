@@ -94,6 +94,11 @@ will run the scenarios of size 10 and of the base variation. \
 Note that the arguments must match the folder names under the `applications/example-attacks/scenarios/` folder.
 
 3. The outputs of the experiments are placed under `applications/example-attacks/scenarios_output/` with the same folder structure as `applications/example-attacks/scenarios/`
+
+4. Finally, to generate the .csv files used as the machine learning model features, run the `csv_generation/gen_csv.py` script, it takes a list of attack types as argument (must match the folder names under `applications/example-attacks/scenarios_output/`). This will place the csv files in the output folders located in `applications/example-attacks/scenarios_output/`.
+```console
+$ python3 csv_generation/gen_csv.py "[worst_parent, local repair]"
+```
 ## Extending the Codebase
 
 ### Adding a New Attack
