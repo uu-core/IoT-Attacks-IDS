@@ -38,7 +38,8 @@ This repository builds on the multi-trace repository to provide a framework for 
 
 ├── applications/\
 ├── services/\
-└── node\_generation/
+├── node\_generation/\
+└── csv\_generation/
 
 ### `applications/`
 
@@ -68,20 +69,27 @@ This folder automates the generation of scenarios.
   - Insert these positions into template `.csc` files.
 - Automates creation of simulations with different node counts, attack types, and variations.
 
+### `csv_generation/`
+
+This folder deals with creating the csv files from the scenario outputs
+
+- **Python Scripts**:
+  - Process the log files in an output folder into a csv file that can be used as features for the ML models.
+  - Automate the process of going through all output folders.
 ---
 
 ## Example Run
 
-1. Navigate to the `node_generation/` folder and run the files `gen_nodes.py` and `insert_nodes.py`
+1. Navigate to the `node_generation/` folder and run the files `gen_nodes.py` and `insert_nodes.py`. `gen_nodes.py` takes a list of integers as arguemnt, that is the number of nodes to be generated. `insert_nodes.py` takes a list of strings, that is the attacks the generated nodes should be insterted into.
 ```console
 $ cd node_generation
-$ python3 gen_nodes.py "[5, 10, 15, 20]"
-$ python3 insert_nodes.py
+$ python3 gen_nodes.py '[5, 10, 15, 20]'
+$ python3 insert_nodes.py '["worst_parent", "local_repair", "blackhole", "dis_flooding"]'
 ```
 This will have created the `applications/example-attacks/scenarios/` folder which contains all of the generated .csc files
 
 2. To run the experiments, use the `run-experiments.sh` script. By default it will run all generated .csc files below `applications/example-attacks/scenarios/`, you can also specify if you want to run a specific attack/size/variations by using the arguments --attack --size --variation .\
-The command:
+For example, the command:
 ```console
 $ ./run-experiments.sh --attack blackhole
 ```
@@ -97,36 +105,24 @@ Note that the arguments must match the folder names under the `applications/exam
 
 4. Finally, to generate the .csv files used as the machine learning model features, run the `csv_generation/gen_csv.py` script, it takes a list of attack types as argument (must match the folder names under `applications/example-attacks/scenarios_output/`). This will place the csv files in the output folders located in `applications/example-attacks/scenarios_output/`.
 ```console
-$ python3 csv_generation/gen_csv.py "[worst_parent, local repair]"
+$ python3 csv_generation/gen_csv.py '["worst_parent", "local repair"]'
 ```
-## Extending the Codebase
 
 ### Adding a New Attack
-TODO \
-1. **Create a new `.c` file** in `services/` implementing your attack logic.
+1. Navigate to the `services/network-attacks` folder.
 2. Add a runtime check for your attack's control flag:
 
    ```c
-   if (attack_enabled_flag) {
-       // Attack behavior here
-   }
+   bool attack_enabled_flag = false;
+   static void
+    check_config(void *ptr)
+    {
+    if (attack_enabled_flag) {
+        // Attack behavior here
+    }
+    }
    ```
 3. Update the relevant `.csc` files in `applications/` to include and toggle your attack.
-
-### Adding a New Scenario
-
-1. Add your `.csc` template to `applications/`.
-2. Modify or extend the Python scripts in `node_generation/` to:
-
-   * Insert positions
-   * Configure node types
-
----
-
-## Notes
-
-* Attack toggling is handled entirely through simulation configuration (`.csc`) files without requiring recompilation.
-* Node behaviors (client, server, attacker) are defined by application roles and services enabled at runtime.
 
 ---
 

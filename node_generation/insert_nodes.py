@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import json
 import os
+import ast  # For parsing list input safely
+import sys
 import random
 
 # Mapping of attack type to point file prefix
@@ -108,18 +110,26 @@ def randomize_positions(csc_file, num_nodes):
         tree.write(output_file, encoding="utf-8", xml_declaration=True)
 
 if __name__ == "__main__":
-    num_nodes = [5, 10, 15, 20]
+    if len(sys.argv) != 2:
+        print("Usage: python3 script.py \"[attack1, attack2, ...]\"")
+        sys.exit(1)
 
-    # Just the base attack types, no suffixes or extensions
-    attack_types = [
-        "local_repair",
-        "worst_parent",
-        "blackhole",
-        "dis_flooding"
-    ]
+    try:
+        attack_types = ast.literal_eval(sys.argv[1])
+        if not isinstance(attack_types, list):
+            raise ValueError
+    except Exception:
+        print("Error: Invalid attack list. Use format like \"[worst_parent, blackhole]\"")
+        sys.exit(1)
+
+    num_nodes = [5, 10, 15, 20]
 
     # Expand to full filenames with variants like "-base", "-oo", "-gc"
     attack_files = [f"{attack}-{variant}" for attack in attack_types for variant in VARIANTS]
+
+    # Base path where the .csc files are located
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_PATH = os.path.join(SCRIPT_DIR, "../applications/example-attacks/simulations")
 
     for n in num_nodes:
         for filename in attack_files:
