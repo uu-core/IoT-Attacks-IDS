@@ -141,7 +141,7 @@ var msgrecv = /.+INFO: App.+Received +message.+ from ([0-9a-f:]+).*/;
 var r = new java.util.Random();
 
 /* timeout in milliseconds */
-TIMEOUT(65000000);
+TIMEOUT(33850000);
 
 function f(value) {
   return (Math.round(value * 100) / 100).toFixed(2);
@@ -225,7 +225,6 @@ log.log("Network steady state!\n");
 
 var attacker = selectAttacker();
 
-TIMEOUT(33850000, if(success) { log.testOK(); });
 GENERATE_MSG(16500000, "attack");
 YIELD_THEN_WAIT_UNTIL(msg.equals("attack"));
 
