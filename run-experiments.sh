@@ -37,31 +37,25 @@ for DIR in "${DIR_LIST[@]}"; do
 
     # Move output folder(s)
     for output_dir in "$DIR"/*/; do
-        [ -d "$output_dir" ] || continue  # skip if not a dir
-        [ "$(basename "$output_dir")" == "$(basename "$DIR")" ] && continue  # skip the current dir if looped
+        [ -d "$output_dir" ] || continue
 
-        # Find the .csc file this output likely corresponds to (assumes only one .csc per output dir)
-        csc_file=$(find "$DIR" -maxdepth 1 -name "*.csc" -print | grep "$(basename "$output_dir")" || true)
+        output_base=$(basename "$output_dir")
 
-        if [ -z "$csc_file" ]; then
-            # Try fallback: match just on name
-            csc_file=$(find "$DIR" -maxdepth 1 -name "*.csc" | head -n 1)
-        fi
-
-        if [ -n "$csc_file" ]; then
-            CSC_FILENAME=$(basename "$csc_file")
-            OUTPUT_NAME=$(echo "$CSC_FILENAME" | awk -F '-' '{print $NF}' | sed 's/\.csc$//')
+        # Skip if it's not an output folder (match on naming pattern)
+        if [[ "$output_base" =~ ^[a-zA-Z0-9_-]+-[0-9]+-[0-9]+-([0-9]+)-dt-[0-9]+$ ]]; then
+            run_id="${BASH_REMATCH[1]}"  # extract the number (e.g., 14)
 
             # Remove unneeded files
             rm -f "$output_dir/radio-log.pcap" "$output_dir/radio-medium.log"
 
-            # Build destination path
+            # Construct destination path
             REL_PATH="${DIR#$BASE_DIR/}"
             DEST_DIR="$OUTPUT_BASE_DIR/$REL_PATH"
             mkdir -p "$DEST_DIR"
 
-            mv "$output_dir" "$DEST_DIR/$OUTPUT_NAME"
-            echo "Moved output to $DEST_DIR/$OUTPUT_NAME"
+            # Move and rename
+            mv "$output_dir" "$DEST_DIR/$run_id"
+            echo "Moved output to $DEST_DIR/$run_id"
         fi
     done
 done
