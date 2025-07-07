@@ -41,22 +41,20 @@ for DIR in "${DIR_LIST[@]}"; do
 
         output_base=$(basename "$output_dir")
 
-        # Skip if it's not an output folder (match on naming pattern)
-        if [[ "$output_base" =~ ^[a-zA-Z0-9_-]+-[0-9]+-[0-9]+-([0-9]+)-dt-[0-9]+$ ]]; then
-            run_id="${BASH_REMATCH[1]}"  # extract the number (e.g., 14)
+        # Extract the run number (assumes format: name-name-size-<number>-dt-<timestamp>)
+        run_id=$(echo "$output_base" | awk -F '-' '{print $(NF-2)}')
 
-            # Remove unneeded files
-            rm -f "$output_dir/radio-log.pcap" "$output_dir/radio-medium.log"
+        # Remove unneeded files
+        rm -f "$output_dir/radio-log.pcap" "$output_dir/radio-medium.log"
 
-            # Construct destination path
-            REL_PATH="${DIR#$BASE_DIR/}"
-            DEST_DIR="$OUTPUT_BASE_DIR/$REL_PATH"
-            mkdir -p "$DEST_DIR"
+        # Build destination path
+        REL_PATH="${DIR#$BASE_DIR/}"
+        DEST_DIR="$OUTPUT_BASE_DIR/$REL_PATH"
+        mkdir -p "$DEST_DIR"
 
-            # Move and rename
-            mv "$output_dir" "$DEST_DIR/$run_id"
-            echo "Moved output to $DEST_DIR/$run_id"
-        fi
+        # Move and rename output directory
+        mv "$output_dir" "$DEST_DIR/$run_id"
+        echo "Moved output to $DEST_DIR/$run_id"
     done
 done
 
