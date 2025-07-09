@@ -43,7 +43,7 @@ if __name__ == "__main__":
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
     # Base path relative to script
-    base_path = os.path.join(SCRIPT_DIR, "../applications/example-attacks/scenarios")
+    base_path = os.path.join(SCRIPT_DIR, "../applications/example-attacks/scenarios_output")
 
     for folder_name in folder_list:
         abs_path = os.path.join(base_path, folder_name)

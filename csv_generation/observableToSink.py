@@ -43,12 +43,12 @@ class MyDataSet():
             # if(os.path.isfile(self.add + "/timeseries_60_sec_timestep.csv")):
             #     pr.prGreen("File already exists!")
             # else:
-            pr.prYellow(" -----  Generating!")
+            print(" -----  Generating!")
 
             return True
         
         else:
-            pr.prRed("The folder or the mote-output.log file does not exist!")
+            print("The folder or the mote-output.log file does not exist!")
             return False
 
 
@@ -277,12 +277,12 @@ class MyDataSet():
         for key, value in self.observations.items():
             value.to_csv(self.add + '/obs_' + str(key) + '.csv')    
 
-        pr.prGreen("Observations Saved!")
+        print("Observations Saved!")
 
 
     def _save_14_features(self):
         self.features.to_csv(self.add + '/features_timeseries_' + str(int(self.binSize/1000000)) + '_sec.csv')
-        pr.prGreen("Labeled Timeseries Saved!")
+        print("Labeled Timeseries Saved!")
 
 
     def _14_labeled_features(self):    
