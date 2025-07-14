@@ -1,7 +1,7 @@
 # Installing Contiki-NG and Cooja
-Based on the Contiki-NG documentation available: https://docs.contiki-ng.org/en/master/doc/getting-started/index.html
+Based on the Contiki-NG documentation available: https://docs.contiki-ng.org/en/master/doc/getting-started/Toolchain-installation-on-Linux.html
 
-The below instructions are intended for the server where parts of the installation is already done. To install elsewhere, use the referenced documentation above.
+The below instructions are intended for the university server where parts of the installation is already done. To install elsewhere, use the referenced documentation above and simply jump to the final step of the instructions below.
 
 1. Add yourself to the wireshark group:
 ```console
@@ -39,6 +39,7 @@ This repository builds on the multi-trace repository to provide a framework for 
 ├── applications/\
 ├── services/\
 ├── node\_generation/\
+├── tools/\
 └── csv\_generation/
 
 ### `applications/`
@@ -68,6 +69,10 @@ This folder automates the generation of scenarios.
   - Generate node position JSON files based on desired network topologies.
   - Insert these positions into template `.csc` files.
 - Automates creation of simulations with different node counts, attack types, and variations.
+
+### `tools/`
+
+Contains the cooja simulator and the contiki-ng operating system, files in here should generally not be modified.
 
 ### `csv_generation/`
 
@@ -99,6 +104,17 @@ The command:
 $ ./run-experiments.sh --size 10 --variation base
 ```
 will run the scenarios of size 10 and of the base variation. \
+The command:
+```console
+$ ./run-experiments.sh
+```
+will run all scenarios. \
+If you want to run scenarios in the background; use `nohup` with an appropriate timeout:
+```console
+$ nohup timeout 4h ./run-experiments.sh --attack blackhole > output.log 2>&1 &
+```
+will run all the blackhole scenarios in the background and write any outputs to `output.log`, and will kill the process if it is still running after 4 hours.\
+\
 Note that the arguments must match the folder names under the `applications/example-attacks/scenarios/` folder.
 
 3. The outputs of the experiments are placed under `applications/example-attacks/scenarios_output/` with the same folder structure as `applications/example-attacks/scenarios/`
@@ -118,10 +134,11 @@ $ python3 csv_generation/gen_csv.py '["worst_parent", "local repair"]'
     check_config(void *ptr)
     {
     if (attack_enabled_flag) {
-        // Attack behavior here
+        // Attack behavior function call here
     }
     }
    ```
+   Some attacks require the contiki-ng operating system to be modified beyond simply modifying the handling of outgoing/incoming traffic, like for the Worst Parent attack. The first step is to identify the part of OS to be modified, which requires studying the OS implementation in `tools/contiki-ng/os`. The implementation of the Worst Parent attack can be used as a reference for how to proceed once the relevant part of the OS is found.
 3. Update the relevant `.csc` files in `applications/` to include and toggle your attack.
 
 ---
