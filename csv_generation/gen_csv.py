@@ -23,7 +23,7 @@ def process_folders(root_folder):
             for subfolder in os.listdir(var_path):
                 subfolder_path = os.path.join(var_path, subfolder)
                 if os.path.isdir(subfolder_path):  
-                    obs.MyDataSet(dataAdd=subfolder_path, binSize=60)  # Run function on each folder
+                    obs.MyDataSet(dataAdd=subfolder_path, binSize=60)  # Run observavleToSink on the output folder
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
