@@ -10,7 +10,8 @@ ATTACK_PREFIXES = {
     "local_repair": "lr",
     "worst_parent": "wp",
     "blackhole": "bh",
-    "dis_flooding": "df"
+    "dis_flooding": "df",
+    "failing_node": "fn"
 }
 
 BASE_PATH = "../applications/example-attacks/simulations"
