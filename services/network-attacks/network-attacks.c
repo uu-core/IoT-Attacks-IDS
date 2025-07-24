@@ -292,7 +292,7 @@ get_transmission_power(void) { // returns between 0 and 31
 }
 
 static void
-toggle_transmission_power(int power) { // power between 0 and 31
+toggle_transmission_power(void) { //
   network_attacks_toggle_transmission_power = false;
   if(original_power == -1){
     original_power = get_transmission_power();
@@ -309,7 +309,7 @@ static void
 decrement_transmission_power(void) { // decrement by 1 if not already 0, power between 0 and 31
   network_attacks_decrement_transmission_power = false;
   if(get_transmission_power() > 0) {
-    set_transmission_power(get_transmission_power() - 1);
+    cc2420_set_txpower(get_transmission_power() - 1);
   }
 }
 /*---------------------------------------------------------------------------*/
