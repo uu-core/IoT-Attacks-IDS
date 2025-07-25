@@ -237,7 +237,7 @@ GENERATE_MSG(20000, "decrease-trans-power");
 while(true) {
     YIELD();
     if (msg.equals("decrease-trans-power")) {
-      setBool(attacker, 'network_attacks_decrement_transmission_power', true);
+      setBool(attacker, 'network_attacks_toggle_radio', true);
       log.log("Decreasing transmission range on node " + attacker.getID() + "!\n");
       GENERATE_MSG(850000, "decrease-trans-power"); //more than 31 times.
     }

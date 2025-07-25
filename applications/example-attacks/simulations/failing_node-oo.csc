@@ -240,7 +240,7 @@ for(var i = 0; i &lt; 15; i++) { // 14 times, change if need
   }
 
   /* Configure failing node */
-  setBool(attacker, 'network_attacks_toggle_transmission_power', true);
+  setBool(attacker, 'network_attacks_toggle_radio', true);
 
 
   // Stop Attack after 15 mins
@@ -248,7 +248,7 @@ for(var i = 0; i &lt; 15; i++) { // 14 times, change if need
   YIELD_THEN_WAIT_UNTIL(msg.equals("stop-attack"));
 
   log.log("Stopped - Failing node: " + attacker.getID() + "!\n");
-  setBool(attacker, 'network_attacks_toggle_transmission_power', true);
+  setBool(attacker, 'network_attacks_toggle_radio', true);
 }
 
 success = true;

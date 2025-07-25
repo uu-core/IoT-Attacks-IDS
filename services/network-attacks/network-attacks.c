@@ -35,7 +35,8 @@
 #include "net/ipv6/uipbuf.h"
 #include "net/ipv6/uip-ds6.h"
 #include "net/ipv6/uip-icmp6.h"
-#include "../arch/dev/radio/cc2420/cc2420.h" //for changing transmission power
+#include "net/netstack.h"
+#include "dev/radio.h"
 #if ROUTING_CONF_RPL_LITE
 #include "rpl_of0_worst.h" //EDIT
 #include "net/routing/rpl-lite/rpl.h"
@@ -198,9 +199,8 @@ bool network_attacks_set_of_to_counter = false;
 /*
  * failing node
  */
-bool network_attacks_toggle_transmission_power = false;
-bool network_attacks_decrement_transmission_power = false;
-uint8_t original_power = -1;
+bool network_attacks_toggle_radio = false;
+static bool radio_is_on = true;
 
 int get_of_counter(void) {
   return *of_counter_ptr;
@@ -286,41 +286,24 @@ decrement_fake_rank(void) {
 }
 
 /*---------------------------------------------------------------------------*/
-static int
-get_transmission_power(void) { // returns between 0 and 31
-  return cc2420_get_txpower();
-}
-
 static void
-toggle_transmission_power(void) { //
-  network_attacks_toggle_transmission_power = false;
-  if(original_power == -1){
-    original_power = get_transmission_power();
-  }
-  if(get_transmission_power() == 0) {
-    cc2420_set_txpower(original_power);
+toggle_radio(void) { //
+  network_attacks_toggle_radio = false;
+  if(!radio_is_on) {
+    NETSTACK_RADIO.on();
+    radio_is_on = true;
   }
   else {
-    cc2420_set_txpower(0);
-  }
-}
-
-static void
-decrement_transmission_power(void) { // decrement by 1 if not already 0, power between 0 and 31
-  network_attacks_decrement_transmission_power = false;
-  if(get_transmission_power() > 0) {
-    cc2420_set_txpower(get_transmission_power() - 1);
+    NETSTACK_RADIO.off();
+    radio_is_on = false;
   }
 }
 /*---------------------------------------------------------------------------*/
 static void
 check_config(void *ptr)
 {
-  if(network_attacks_decrement_transmission_power) {
-    decrement_transmission_power();
-  }
-  if(network_attacks_toggle_transmission_power) {
-    toggle_transmission_power();
+  if(network_attacks_toggle_radio) {
+    toggle_radio();
   }
   if(current_fake_id != network_attacks_fake_id) {
     set_fake_id(network_attacks_fake_id);

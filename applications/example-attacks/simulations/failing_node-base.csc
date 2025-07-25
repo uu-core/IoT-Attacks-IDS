@@ -232,7 +232,7 @@ log.log("Failing node: " + attacker.getID() + "!\n");
 sim.getEventCentral().logEvent("attack", "failing node:" + attacker.getID());
 
 /* Configure WP random attack */
-setBool(attacker, 'network_attacks_toggle_transmission_power', true);
+setBool(attacker, 'network_attacks_toggle_radio', true);
 
 GENERATE_MSG(27000000, "continue");
 YIELD_THEN_WAIT_UNTIL(msg.equals("continue"));
