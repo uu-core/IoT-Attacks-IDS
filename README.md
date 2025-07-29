@@ -88,8 +88,8 @@ This folder deals with creating the csv files from the scenario outputs
 1. Navigate to the `node_generation/` folder and run the files `gen_nodes.py` and `insert_nodes.py`. `gen_nodes.py` takes a list of integers as arguemnt, that is the number of nodes to be generated. `insert_nodes.py` takes a list of strings, that is the attacks the generated nodes should be insterted into.
 ```console
 $ cd node_generation
-$ python3 gen_nodes.py '[5, 10, 15, 20]'
-$ python3 insert_nodes.py '["worst_parent", "local_repair", "blackhole", "dis_flooding"]'
+$ python3 gen_nodes.py 5,10,15,20
+$ python3 insert_nodes.py worst_parent,local_repair,blackhole,dis_flooding
 ```
 This will have created the `applications/example-attacks/scenarios/` folder which contains all of the generated .csc files
 
@@ -121,7 +121,7 @@ Note that the arguments must match the folder names under the `applications/exam
 
 4. Finally, to generate the .csv files used as the machine learning model features, run the `csv_generation/gen_csv.py` script, it takes a list of attack types as argument (must match the folder names under `applications/example-attacks/scenarios_output/`). This will place the csv files in the output folders located in `applications/example-attacks/scenarios_output/`.
 ```console
-$ python3 csv_generation/gen_csv.py '["worst_parent", "local_repair"]'
+$ python3 csv_generation/gen_csv.py worst_parent,local_repair
 ```
 
 ### Adding a New Attack

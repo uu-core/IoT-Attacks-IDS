@@ -112,16 +112,15 @@ def randomize_positions(csc_file, num_nodes):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 script.py \"[attack1, attack2, ...]\"")
+        print("Usage: python3 script.py attack1,attack2,...")
         sys.exit(1)
 
-    try:
-        attack_types = ast.literal_eval(sys.argv[1])
-        if not isinstance(attack_types, list):
-            raise ValueError
-    except Exception:
-        print("Error: Invalid attack list. Use format like \"[worst_parent, blackhole]\"")
+    attack_arg = sys.argv[1]
+    attack_types = [a.strip() for a in attack_arg.split(",") if a.strip()]
+    if not attack_types:
+        print("Error: No valid attack types provided.")
         sys.exit(1)
+
 
     num_nodes = [5, 10, 15, 20]
 

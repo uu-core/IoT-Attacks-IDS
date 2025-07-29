@@ -118,16 +118,15 @@ def save_points_to_file(filename, num_nodes, num_samples=20):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 program.py [5,10,15]")
+        print("Usage: python3 program.py 5,10,15")
         sys.exit(1)
 
     try:
-        # Parse argument safely as list of integers
-        node_list = ast.literal_eval(sys.argv[1])
-        if not isinstance(node_list, list) or not all(isinstance(n, int) for n in node_list):
+        node_list = [int(n.strip()) for n in sys.argv[1].split(",") if n.strip()]
+        if not node_list:
             raise ValueError
-    except:
-        print("Error: Argument must be a list of integers. Example: [5,10,15]")
+    except ValueError:
+        print("Error: Argument must be a comma-separated list of integers. Example: 5,10,15")
         sys.exit(1)
 
     script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the current script

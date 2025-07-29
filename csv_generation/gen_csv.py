@@ -27,16 +27,14 @@ def process_folders(root_folder):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 gen_feat.py \"[folder1, folder2, ...]\"")
+        print("Usage: python3 gen_feat.py folder1,folder2,...")
         sys.exit(1)
 
-    try:
-        # parse the input string to a Python list
-        folder_list = ast.literal_eval(sys.argv[1])
-        if not isinstance(folder_list, list):
-            raise ValueError
-    except Exception:
-        print("Error: Invalid folder list. Use the format: \"[folder1, folder2]\"")
+    
+    folder_arg = sys.argv[1]
+    folder_list = [a.strip() for a in folder_arg.split(",") if a.strip()]
+    if not folder_list:
+        print("Error: No valid folder provided.")
         sys.exit(1)
 
     # Get script directory

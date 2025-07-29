@@ -1,3 +1,4 @@
 applications/example-attacks/scenarios
 node_generation/output
 **/.DS_Store
+.vscode
