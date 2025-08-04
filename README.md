@@ -123,10 +123,11 @@ Note that the arguments must match the folder names under the `applications/exam
 ```console
 $ python3 csv_generation/gen_csv.py worst_parent,local_repair
 ```
+---
+## Adding a New Attack
 
-### Adding a New Attack
 1. Navigate to the `services/network-attacks` folder.
-2. Add a runtime check for your attack's control flag:
+2. In `network-attacks.c`, add a runtime check for your attack's control flag:
 
    ```c
    bool attack_enabled_flag = false;
@@ -140,6 +141,53 @@ $ python3 csv_generation/gen_csv.py worst_parent,local_repair
    ```
    Some attacks require the contiki-ng operating system to be modified beyond simply modifying the handling of outgoing/incoming traffic, like for the Worst Parent attack. The first step is to identify the part of OS to be modified, which requires studying the OS implementation in `tools/contiki-ng/os`. The implementation of the Worst Parent attack can be used as a reference for how to proceed once the relevant part of the OS is found.
 3. Update the relevant `.csc` files in `applications/` to include and toggle your attack.
+
+### Example Implementation: Failing Node
+The purpose of the failing node scenario is to generate data that is out of the ordinary but not due to an attack. Instead, a node will "fail", by "fail" we mean going offline, and from the perspective of the other nodes in the network the failing node disappears. This data can then be used to evaluate if a model is actually detecting attacks, or if it only detects when the data is not normal.
+
+The way we simulate this behavior in the simulator is by shutting off the radio of the node chosen for failiure, which will stop all outgoing communication from the node and make it invisible from other nodes.
+
+1. Find out where in `tools/contiki-ng/os` the relevant code is for manipulating the radio of a node: On API for toggling the radio can be found in `tools/contiki-ng/os/dev/radio.h`.
+2. Add the logic of toggling the radio and the runtime flag check in `network-attacks.c`:
+```c
+...
+
+#include "dev/radio.h"
+...
+
+bool network_attacks_toggle_radio = false;
+static bool radio_is_on = true;
+...
+
+static void
+toggle_radio(void) { //
+  network_attacks_toggle_radio = false;
+  if(!radio_is_on) {
+    NETSTACK_RADIO.on();
+    radio_is_on = true;
+  }
+  else {
+    NETSTACK_RADIO.off();
+    radio_is_on = false;
+  }
+}
+...
+
+static void
+  check_config(void *ptr) {
+    ...
+    if(network_attacks_toggle_radio) {
+      toggle_radio();
+    }
+    ...
+  }
+```
+3. In `applications/example-attacks/simulations`, create the `failing_node-base.csc` file, this is easiest done by copying one of the existing `.csc` as most of the configuation will be the same across all `.csc` files. You probably only need to modify the `<script>` part of the file, note that the function selectAttacker() is overwritten by `node_generation/insert_nodes.py`, so remember to modify `insert_nodes.py` if you want to make changes to selectAttacker().
+
+To toggle activate your attack, you must set the bool that you added in `network-attacks.c` during the previous step using setBool(node id, bool name, value).
+```c
+setBool(attacker, 'network_attacks_toggle_radio', true);
+```
 
 ---
 
