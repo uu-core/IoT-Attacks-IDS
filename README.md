@@ -89,7 +89,7 @@ This folder deals with creating the csv files from the scenario outputs
 ```console
 $ cd node_generation
 $ python3 gen_nodes.py 5,10,15,20
-$ python3 insert_nodes.py worst_parent,local_repair,blackhole,dis_flooding
+$ python3 insert_nodes.py worst_parent,local_repair,blackhole,dis_flooding,failing_node
 ```
 This will have created the `applications/example-attacks/scenarios/` folder which contains all of the generated .csc files
 
