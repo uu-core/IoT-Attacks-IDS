@@ -35,6 +35,9 @@
 #include "net/ipv6/simple-udp.h"
 #include "sys/energest.h"
 #include "app-message.h"
+#include "net/link-stats.h"
+#include "net/nbr-table.h"
+#include "net/linkaddr.h"
 //#include "icmp6-stats.h"
 #include "network-attacks.h"
 #include "net/ipv6/uiplib.h" //EDIT
@@ -210,7 +213,17 @@ PROCESS_THREAD(udp_client_process, ev, data)
               icmp6_stats.dio_uc_sent + icmp6_stats.dio_mc_sent);
      LOG_INFO_(",diar:%"PRIu32",tots:%"PRIu32"\n", 
               icmp6_stats.dao_recv, icmp6_stats.rpl_total_sent);
-
+     bool flag = true;
+     if (flag) {
+      LOG_INFO("DATA: sq:%" PRIu32 ",rank:%3u,ver:%u", count, rank, dag_version);
+      nbr_table_key_t *nbr_key = nbr_table_key_head();
+      while(nbr_key != NULL) {
+        const struct link_stats *stats = link_stats_from_lladdr(&(nbr_key->lladdr));
+        LOG_INFO_("lladdr: %02x:%02x, ETX: %u, RSSI: %d", 
+                  nbr_key->lladdr.u8[0], nbr_key->lladdr.u8[1], stats->etx, stats->rssi);
+        nbr_key = nbr_table_key_next(nbr_key);
+      }
+     }
 /* */    
       msg.rpl_dag_version = dag_version;
       simple_udp_sendto(&udp_conn, &msg, sizeof(msg), &dest_ipaddr);
