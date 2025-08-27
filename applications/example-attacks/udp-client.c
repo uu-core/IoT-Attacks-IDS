@@ -215,12 +215,11 @@ PROCESS_THREAD(udp_client_process, ev, data)
               icmp6_stats.dao_recv, icmp6_stats.rpl_total_sent);
      bool flag = true;
      if (flag) {
-      LOG_INFO("DATA: sq:%" PRIu32 ",rank:%3u,ver:%u", count, rank, dag_version);
       nbr_table_key_t *nbr_key = nbr_table_key_head();
       while(nbr_key != NULL) {
         const struct link_stats *stats = link_stats_from_lladdr(&(nbr_key->lladdr));
-        LOG_INFO_("lladdr: %02x:%02x, ETX: %u, RSSI: %d", 
-                  nbr_key->lladdr.u8[0], nbr_key->lladdr.u8[1], stats->etx, stats->rssi);
+        LOG_INFO_("RADIO DATA: sq:%u,lladdr:%02x:%02x,ETX:%u,RSSI:%d \n",
+                  count, nbr_key->lladdr.u8[0], nbr_key->lladdr.u8[1], stats->etx, stats->rssi);
         nbr_key = nbr_table_key_next(nbr_key);
       }
      }
