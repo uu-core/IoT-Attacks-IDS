@@ -188,9 +188,4 @@ To toggle activate your attack, you must set the bool that you added in `network
 ```c
 setBool(attacker, 'network_attacks_toggle_radio', true);
 ```
-
----
-
-## License
-
 ---
