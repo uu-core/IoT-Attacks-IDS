@@ -1,4 +1,4 @@
-# 🧠 Continual Learning for IoT Intrusion Detection
+# 🧠 Quantifying Catastrophic Forgetting in IoT Intrusion Detection Systems
 
 This repository contains code for **domain-incremental continual learning (CL)** for Intrusion Detection Systems (IDS) in **RPL-based IoT networks**.  
 The framework evaluates multiple CL methods — including **Synaptic Intelligence (SI)**, **Elastic Weight Consolidation (EWC)**, **Learning without Forgetting (LwF)**, **Replay**, and **Generative Replay (GR)** — under different **domain ordering scenarios**, such as Worst-to-Best, Best-to-Worst, and Toggle (adversarial).
@@ -18,22 +18,20 @@ The framework evaluates multiple CL methods — including **Synaptic Intelligenc
 │   ├── train_CL_EWC.py              # Elastic Weight Consolidation training
 │   ├── train_CL_LWF.py              # Learning without Forgetting training
 │   ├── train_CL_genreplay.py       # Generative Replay training
-│
-├── Attack_data/    # <-- Datasets are stored OUTSIDE src/
-│   ├── Domain_1/
-│   │   ├── data_1.csv
-│   │   ├── data_2.csv
+│   │
+│   ├── Attack_data/
+│   │   ├── Domain_1/
+│   │   │   ├── data_1.csv
+│   │   │   ├── data_2.csv
+│   │   │   └── ...
+│   │   ├── Domain_2/
+│   │   │   ├── data_1.csv
+│   │   │   ├── data_2.csv
+│   │   │   └── ...
 │   │   └── ...
-│   ├── Domain_2/
-│   │   ├── data_1.csv
-│   │   ├── data_2.csv
-│   │   └── ...
-│   └── ...
 │
 └── README.md
 ```
-
-> ⚠️ **Important:** The attack datasets are stored **outside** the `src/` directory. Each domain corresponds to a specific attack–variant–network size combination, and contains one or more CSV files.
 
 ---
 
@@ -55,11 +53,12 @@ pip install -r requirements.txt
 
 ## 📊 Dataset Format
 
-The dataset is structured into **domains**, each representing a unique combination of attack type, behavioral variant, and network size.  
+The dataset is located in **`src/Attack_data/`**.  
+It is organized into **domains**, each representing a unique combination of attack type, behavioral variant, and network size.  
 Within each domain, multiple CSV files contain time-windowed feature logs of IoT traffic.
 
 ```
-Attack_data/
+src/Attack_data/
 ├── Domain_1/
 │   ├── data_1.csv
 │   ├── data_2.csv
@@ -75,7 +74,7 @@ Attack_data/
 - **Labels:** `0` (benign) or `1` (attack)  
 - Data is pre-windowed before training using sliding windows.
 
-You can specify the **path to `Attack_data`** when running the training scripts using the `--data_root` argument.
+The code automatically loads data from this folder — **no manual path specification is needed**.
 
 ---
 
@@ -85,35 +84,35 @@ All training scripts are located in `src/`. Each script corresponds to a specifi
 
 ### Baseline (W/O CL)
 ```bash
-python src/train_WCL_w2b_b2w_togg.py --data_root /path/to/Attack_data --scenario w2b
+python src/train_WCL_w2b_b2w_togg.py --scenario w2b
 ```
 
 ### Synaptic Intelligence
 ```bash
-python src/train_CL_SI.py --data_root /path/to/Attack_data
+python src/train_CL_SI.py
 ```
 
 ### Elastic Weight Consolidation
 ```bash
-python src/train_CL_EWC.py --data_root /path/to/Attack_data
+python src/train_CL_EWC.py
 ```
 
 ### Learning without Forgetting
 ```bash
-python src/train_CL_LWF.py --data_root /path/to/Attack_data
+python src/train_CL_LWF.py
 ```
 
 ### Generative Replay
 ```bash
-python src/train_CL_genreplay.py --data_root /path/to/Attack_data
+python src/train_CL_genreplay.py
 ```
 
 ---
 
 ## ⚙️ Hyperparameters
 
-All scripts support various hyperparameters such as learning rate, epochs, method-specific weights (e.g., `si_c`, `ewc_lambda`, `alpha`, replay buffer size, etc.).  
-Please refer to the **Hyperparameters** section in the code (`utils.py` and training scripts) to tune them as needed.
+All scripts support various hyperparameters such as learning rate, epochs, and method-specific weights (e.g., `si_c`, `ewc_lambda`, `alpha`, replay buffer size, etc.).  
+Refer to the hyperparameter definitions in the training scripts or `utils.py`.
 
 ---
 
@@ -133,10 +132,5 @@ Please refer to the **Hyperparameters** section in the code (`utils.py` and trai
 If you use this code or dataset in your research, please cite:
 
 ```
-@inproceedings{banerjee2025continual,
-  title={Continual Learning-based Intrusion Detection for RPL-based IoT Networks},
-  author={Banerjee, Sourasekhar and ...},
-  booktitle={...},
-  year={2025}
-}
+
 ```
