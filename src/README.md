@@ -1,4 +1,3 @@
-
 # 🧠 Continual Learning for IoT Intrusion Detection
 
 This repository contains code for **domain-incremental continual learning (CL)** for Intrusion Detection Systems (IDS) in **RPL-based IoT networks**.  
@@ -8,29 +7,31 @@ The framework evaluates multiple CL methods — including **Synaptic Intelligenc
 
 ## 📁 Project Structure
 
+```
+.
 ├── src/
-│ ├── main.py # Entry point for launching experiments
-│ ├── models.py # LSTM-based IDS models
-│ ├── utils.py # Data loading, preprocessing, metric utilities
-│ ├── train_WCL_w2b_b2w_togg.py # Baseline: sequential fine-tuning under different orderings
-│ ├── train_CL_SI.py # Synaptic Intelligence training
-│ ├── train_CL_EWC.py # Elastic Weight Consolidation training
-│ ├── train_CL_LWF.py # Learning without Forgetting training
-│ ├── train_CL_genreplay.py # Generative Replay training
+│   ├── main.py                      # Entry point for launching experiments
+│   ├── models.py                    # LSTM-based IDS models
+│   ├── utils.py                     # Data loading, preprocessing, metric utilities
+│   ├── train_WCL_w2b_b2w_togg.py    # Baseline: sequential fine-tuning under different orderings
+│   ├── train_CL_SI.py               # Synaptic Intelligence training
+│   ├── train_CL_EWC.py              # Elastic Weight Consolidation training
+│   ├── train_CL_LWF.py              # Learning without Forgetting training
+│   ├── train_CL_genreplay.py       # Generative Replay training
 │
-├── Attack_data/ # <-- Datasets are stored OUTSIDE src/
-│ ├── Domain_1/
-│ │ ├── data_1.csv
-│ │ ├── data_2.csv
-│ │ └── ...
-│ ├── Domain_2/
-│ │ ├── data_1.csv
-│ │ ├── data_2.csv
-│ │ └── ...
-│ └── ...
+├── Attack_data/    # <-- Datasets are stored OUTSIDE src/
+│   ├── Domain_1/
+│   │   ├── data_1.csv
+│   │   ├── data_2.csv
+│   │   └── ...
+│   ├── Domain_2/
+│   │   ├── data_1.csv
+│   │   ├── data_2.csv
+│   │   └── ...
+│   └── ...
 │
 └── README.md
-
+```
 
 > ⚠️ **Important:** The attack datasets are stored **outside** the `src/` directory. Each domain corresponds to a specific attack–variant–network size combination, and contains one or more CSV files.
 
@@ -48,13 +49,16 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
 
+---
 
-Dataset Format
+## 📊 Dataset Format
 
-The dataset is structured into domains, each representing a unique combination of attack type, behavioral variant, and network size.
+The dataset is structured into **domains**, each representing a unique combination of attack type, behavioral variant, and network size.  
 Within each domain, multiple CSV files contain time-windowed feature logs of IoT traffic.
 
+```
 Attack_data/
 ├── Domain_1/
 │   ├── data_1.csv
@@ -65,36 +69,74 @@ Attack_data/
 │   ├── data_2.csv
 │   └── ...
 └── ...
+```
 
-Features: 14 per record (control message counts, rank changes, packet stats, etc.)
+- **Features:** 14 per record (control message counts, rank changes, packet stats, etc.)  
+- **Labels:** `0` (benign) or `1` (attack)  
+- Data is pre-windowed before training using sliding windows.
 
-Labels: 0 (benign) or 1 (attack)
+You can specify the **path to `Attack_data`** when running the training scripts using the `--data_root` argument.
 
-Data is pre-windowed before training using sliding windows.
+---
 
-You can specify the path to Attack_data when running the training scripts using the --data_root argument.
+## 🚀 Running Experiments
 
+All training scripts are located in `src/`. Each script corresponds to a specific continual learning strategy.
 
-Running Experiments
-
-All training scripts are located in src/. Each script corresponds to a specific continual learning strategy.
-
-Baseline (W/O CL)
+### Baseline (W/O CL)
+```bash
 python src/train_WCL_w2b_b2w_togg.py --data_root /path/to/Attack_data --scenario w2b
+```
 
-Synaptic Intelligence
+### Synaptic Intelligence
+```bash
 python src/train_CL_SI.py --data_root /path/to/Attack_data
+```
 
-Elastic Weight Consolidation
+### Elastic Weight Consolidation
+```bash
 python src/train_CL_EWC.py --data_root /path/to/Attack_data
+```
 
-Learning without Forgetting
+### Learning without Forgetting
+```bash
 python src/train_CL_LWF.py --data_root /path/to/Attack_data
+```
 
-Generative Replay
+### Generative Replay
+```bash
 python src/train_CL_genreplay.py --data_root /path/to/Attack_data
+```
 
-Hyperparameters
+---
 
-All scripts support various hyperparameters such as learning rate, epochs, method-specific weights (e.g., si_c, ewc_lambda, alpha, replay buffer size, etc.).
-Please refer to the Hyperparameters section in the code (utils.py and training scripts) to tune them as needed.
+## ⚙️ Hyperparameters
+
+All scripts support various hyperparameters such as learning rate, epochs, method-specific weights (e.g., `si_c`, `ewc_lambda`, `alpha`, replay buffer size, etc.).  
+Please refer to the **Hyperparameters** section in the code (`utils.py` and training scripts) to tune them as needed.
+
+---
+
+## 📝 Outputs
+
+- Each experiment produces a JSON file containing per-domain metrics:
+  - Performance (F1/AUC)
+  - Stability (BWT)
+  - Plasticity
+  - Efficiency
+- These logs can be used for visualization, comparison across CL methods, or statistical analysis.
+
+---
+
+## 🧠 Citation
+
+If you use this code or dataset in your research, please cite:
+
+```
+@inproceedings{banerjee2025continual,
+  title={Continual Learning-based Intrusion Detection for RPL-based IoT Networks},
+  author={Banerjee, Sourasekhar and ...},
+  booktitle={...},
+  year={2025}
+}
+```
