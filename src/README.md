@@ -109,11 +109,47 @@ python src/train_CL_genreplay.py
 
 ---
 
-## ⚙️ Hyperparameters
+## ⚙️ Hyperparameters (used in our experiments)
 
-All scripts support various hyperparameters such as learning rate, epochs, and method-specific weights (e.g., `si_c`, `ewc_lambda`, `alpha`, replay buffer size, etc.).  
-Refer to the hyperparameter definitions in the training scripts or `utils.py`.
+**Run context**
+- Project: `attack_CL`
+- Entity: `sourasb05`
+- Algorithm: `Replay`
+- Scenario: `w2b`
+- Architecture: `LSTM`
 
+### Global / shared
+- Learning rate: `0.001`
+- Epochs: `100`
+- Batch size: `256`
+- Early stopping patience: `50`
+- Window size: `10`
+- Step size: `3`
+- Weight decay: `0.0001`
+- Forgetting threshold (reporting): `0.01`
+- Seed: (default in code, typically `42`)
+
+### Model
+- Input size: `140`
+- Hidden size: `10`
+- Output size: `2`
+- LSTM layers: `1`
+- Dropout: `0.05`
+- Bidirectional: `False` (default unless set elsewhere)
+
+### Method-specific (Replay) — **active**
+- Total replay capacity (`memory_size`): `4000`
+- Per-domain cap (`replay_per_domain_cap`): **`250`**
+  - ⚠️ Note: Code hard-codes `250`. Your env had `PER_DOMAIN_CAP=300`, but this value is **ignored** by the current call.
+- Replay batch size (`replay_batch_size`): `128`
+- Replay ratio (`replay_ratio`): `0.5`
+- Replay seen-only (`replay_seen_only`): `True`
+
+### Method-specific knobs (present in args but **not used** in this Replay run)
+- **LwF**: `alpha=1.0`, `temperature=4.0`, `enc_lr_scale=0.5`, `warmup_epochs=10`
+- **SI**: `si_c`, `si_xi`, schedules (unused here)
+- **EWC**: `ewc_lambda`, λ schedules, Fisher options (unused here)
+- **GR**: VAE and distillation parameters (unused here)
 ---
 
 ## 📝 Outputs
