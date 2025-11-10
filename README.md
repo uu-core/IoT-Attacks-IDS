@@ -1,7 +1,7 @@
 # Installing Contiki-NG and Cooja
 Based on the Contiki-NG documentation available: https://docs.contiki-ng.org/en/master/doc/getting-started/Toolchain-installation-on-Linux.html
 
-The below instructions are intended for the university server where parts of the installation is already done. To install elsewhere, use the referenced documentation above and simply jump to the final step of the instructions below.
+Use the referenced documentation above and simply jump to the final step of the instructions below.
 
 1. Add yourself to the wireshark group:
 ```console
