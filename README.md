@@ -188,4 +188,8 @@ To toggle activate your attack, you must set the bool that you added in `network
 ```c
 setBool(attacker, 'network_attacks_toggle_radio', true);
 ```
+## Continual Learning based IDS
+
+Please go to the [src directory](https://github.com/uu-core/IoT-Attacks-IDS/tree/main/src).
+
 ---
