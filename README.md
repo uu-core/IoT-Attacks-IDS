@@ -192,4 +192,16 @@ setBool(attacker, 'network_attacks_toggle_radio', true);
 
 Please go to the [src directory](https://github.com/uu-core/IoT-Attacks-IDS/tree/main/src).
 
+**BibTeX:**
+
+```bibtex
+@article{bergqvist2025assessing,
+   author = {Bergqvist, David},
+   title = {{Assessing IoT Network Attack Impact and Detection Generalizability using Machine Learning}},
+   
+   school = {Uppsala University, Computer Systems},
+   Journal = {Dissertation, UPTEC IT, 1401-5749, 25004},
+    pages = {47},
+   year = {2025}
+}
 ---
