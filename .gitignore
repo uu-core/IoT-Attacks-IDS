@@ -1,4 +1,9 @@
+applications/example-attacks/build
 applications/example-attacks/scenarios
+applications/example-attacks/scenarios_output
 node_generation/output
+*.log
+
 **/.DS_Store
 .vscode
+

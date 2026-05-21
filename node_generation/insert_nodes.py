@@ -11,6 +11,7 @@ ATTACK_PREFIXES = {
     "worst_parent": "wp",
     "blackhole": "bh",
     "dis_flooding": "df",
+    "version_number": "vn",
     "failing_node": "fn"
 }
 
