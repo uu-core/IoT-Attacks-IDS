@@ -195,6 +195,15 @@ Please go to the [src directory](https://github.com/uu-core/IoT-Attacks-IDS/tree
 **BibTeX:**
 
 ```bibtex
+
+@article{banerjee2026quantifying,
+  title={Quantifying Catastrophic Forgetting in IoT Intrusion Detection Systems},
+  author={Banerjee, Sourasekhar and Bergqvist, David and Toor, Salman and Rohner, Christian and Johnsson, Andreas},
+  journal={arXiv preprint arXiv:2603.00363},
+  year={2026}
+}
+
+
 @article{bergqvist2025assessing,
    author = {Bergqvist, David},
    title = {{Assessing IoT Network Attack Impact and Detection Generalizability using Machine Learning}},
