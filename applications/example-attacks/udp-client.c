@@ -218,8 +218,10 @@ PROCESS_THREAD(udp_client_process, ev, data)
       nbr_table_key_t *nbr_key = nbr_table_key_head();
       while(nbr_key != NULL) {
         const struct link_stats *stats = link_stats_from_lladdr(&(nbr_key->lladdr));
-        LOG_INFO_("RADIO DATA: sq:%u,lladdr:%02x:%02x,ETX:%u,RSSI:%d \n",
+        if (stats != NULL) {
+          LOG_INFO_("RADIO DATA: sq:%u,lladdr:%02x:%02x,ETX:%u,RSSI:%d \n",
                   count, nbr_key->lladdr.u8[0], nbr_key->lladdr.u8[1], stats->etx, stats->rssi);
+        }
         nbr_key = nbr_table_key_next(nbr_key);
       }
      }

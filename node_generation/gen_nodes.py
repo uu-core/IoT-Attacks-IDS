@@ -138,4 +138,5 @@ if __name__ == "__main__":
         save_points_to_file(os.path.join(output_dir, f"generated_points-wp-{num_nodes}.json"), num_nodes)
         save_points_to_file(os.path.join(output_dir, f"generated_points-bh-{num_nodes}.json"), num_nodes)
         save_points_to_file(os.path.join(output_dir, f"generated_points-df-{num_nodes}.json"), num_nodes)
+        save_points_to_file(os.path.join(output_dir, f"generated_points-vn-{num_nodes}.json"), num_nodes)
         save_points_to_file(os.path.join(output_dir, f"generated_points-fn-{num_nodes}.json"), num_nodes)
