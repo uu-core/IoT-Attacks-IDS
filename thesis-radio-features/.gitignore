@@ -1,0 +1,40 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+attackcl/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Simulation build artifacts
+*.o
+*.elf
+*.sky
+*.cooja
+COOJA.log
+build/
+
+# Large generated data and checkpoints
+*.pt
+*.pth
+*.ckpt
+*.pkl
+
+# Local raw simulation outputs
+simulation/validation_outputs/
+simulation/validation_scenarios/
+simulation/venv/
+
+# Temporary files
+*.tmp
+*.bak
