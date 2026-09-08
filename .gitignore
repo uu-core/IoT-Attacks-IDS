@@ -7,3 +7,32 @@ node_generation/output
 **/.DS_Store
 .vscode
 
+
+# Thesis local data and generated outputs
+thesis-radio-features/experiments/original/attack_data/
+thesis-radio-features/results/
+thesis-radio-features/**/__pycache__/
+thesis-radio-features/**/*.pt
+thesis-radio-features/**/*.pth
+thesis-radio-features/**/*.ckpt
+thesis-radio-features/**/*.pkl
+thesis-radio-features/**/*.bak
+thesis-radio-features/**/*.backup
+thesis-radio-features/**/*.before_*
+
+# Thesis generated data and figures
+thesis-radio-features/**/results/
+thesis-radio-features/**/outputs/
+thesis-radio-features/**/analysis_output/
+thesis-radio-features/**/cross_start_results*/
+thesis-radio-features/**/validation_outputs*/
+thesis-radio-features/**/*.csv
+thesis-radio-features/**/*.png
+thesis-radio-features/**/*.jpg
+thesis-radio-features/**/*.jpeg
+thesis-radio-features/**/*.pdf
+thesis-radio-features/**/*.svg
+thesis-radio-features/**/*.pt
+thesis-radio-features/**/*.pth
+thesis-radio-features/**/*.ckpt
+thesis-radio-features/**/*.pkl
