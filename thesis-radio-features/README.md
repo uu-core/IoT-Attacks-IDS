@@ -130,6 +130,85 @@ Recorded source revisions:
 
 These revisions document the source environment; they do not constitute a verified clean-install procedure. The relationship between the original simulation checkout and the publication repository must be considered when reconstructing the environment.
 
+## Expected results
+
+The values below are reference results reported in the thesis, not results generated during repository preparation. They describe the specified historical experiments and should not be treated as pass/fail thresholds for a single new run. Reproduction requires matching the dataset, preprocessing, model implementation, evaluation protocol, and aggregation. The original cumulative experiment and the controlled interval-feature experiment are separate evaluations.
+
+### Original feature comparison
+
+The broad original experiment compares four attacks across 5, 10, 15, and 20 nodes and three behavioural variants. The five feature configurations are All, RSSI-only, RPL+TX/RX, RPL-only, and TX/RX-only.
+
+The thesis reports the following average in-domain F1-scores (Table 5.1):
+
+| Attack | All | RSSI-only | RPL+TX/RX | RPL-only | TX/RX-only |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Blackhole | 0.960 | 0.410 | 0.959 | 0.953 | 0.998 |
+| DIS Flooding | 0.985 | 0.422 | 0.986 | 0.982 | 0.993 |
+| Local Repair | 0.960 | 0.533 | 0.970 | 0.969 | 0.999 |
+| Worst Parent | 0.969 | 0.515 | 0.983 | 0.951 | 0.999 |
+
+These results show strong phase separation by cumulative TX/RX and comparatively weak RSSI-only performance. They do not establish near-perfect attack-specific radio detection, because the original measurements and labels contain temporal structure.
+
+**Expected output files:** The preserved original trainer writes `saved_models/expN/<domain>.pt`, `results/exp_features_N/<domain>/metrics.json`, and timestamped files under `logs/` within the selected run directory. Each metrics JSON contains accuracy, F1, precision, recall, AUC, and a confusion matrix. Table 5.1 is produced by `make_table_5_1.py`; the plotting scripts generate the corresponding comparison and distribution figures. The historical table values are not guaranteed by the current single-run trainer.
+
+### Original cross-domain evaluation
+
+The thesis reports an off-diagonal mean F1-score of approximately 0.853 for cumulative TX/RX-only and 0.390 for RSSI-only, with medians of approximately 0.984 and 0.493, respectively (Table 5.2). The original design therefore favours TX/RX, but performance varies across target attacks, network sizes, and behavioural variants. The result must not be interpreted as universal transferability after temporal confounding is removed.
+
+**Expected output files:** `cross_test.py` writes `results/cross_test/expN/<source_domain>/vs_<target_domain>.json` under the selected output root. The JSON contains classification metrics and a confusion matrix. `plot_cross_domain_summary.py` and `plot_feature_f1_distribution.py` produce the grouped summaries and distribution figures from the evaluation outputs.
+
+### Temporal-confounding diagnostics
+
+The diagnostic experiments on the original dataset report an approximate mean F1-score of 0.966 for absolute time-only features, 0.906 for cumulative TX/RX, and 0.440 for differences calculated from already aggregated TX/RX. Relative time performs almost identically to absolute time, and adding aggregate differences to time does not improve the time-only baseline. These results show that simulation progression explains a substantial part of the original performance. Aggregate differencing is not equivalent to reconstructing node-level interval activity.
+
+**Expected output files in the historical diagnostic layout:**
+
+| Script | Main generated files |
+| --- | --- |
+| `validate_txrx_time_confound.py` | `results/temporal_validation/temporal_validation_all_runs.csv`, `temporal_validation_summary.csv`, `temporal_validation_by_domain.csv`, `temporal_validation_by_attack.csv`, `temporal_validation_f1.png` |
+| `validate_relative_time.py` | `results/relative_time_validation/relative_time_all_runs.csv`, `relative_time_summary.csv`, `absolute_vs_relative_time_summary.csv`, `relative_time_f1.png` |
+| `validate_time_plus_delta_txrx.py` | `results/time_plus_delta_validation/time_plus_delta_all_runs.csv`, `time_plus_delta_summary.csv`, `incremental_value_summary.csv`, `incremental_value_by_domain.csv`, `time_plus_delta_f1.png`, `incremental_f1_gain.png` |
+
+These are the filenames recorded in the original scripts and historical output tree. The diagnostic scripts retain their original path assumptions; their complete execution from the published layout has not been verified.
+
+### Controlled validation
+
+The controlled validation uses node-level interval features, held-out attack-start positions, complete-run train/validation/test separation, and genuine 10-step LSTM sequences. The base comparison uses four attacks in a fixed 15-node setting.
+
+**Cross-start-time classification.** The thesis reports the following mean F1-scores for the base and on-off variants:
+
+| Attack | TX/RX base | TX/RX on-off | RPL base | RPL on-off | RPL+TX/RX base | RPL+TX/RX on-off |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| DIS Flooding | 0.986 | 0.791 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Local Repair | 0.516 | 0.063 | 1.000 | 0.916 | 1.000 | 0.914 |
+| Blackhole | 0.211 | 0.097 | 0.017 | 0.065 | 0.201 | 0.053 |
+| Worst Parent | 0.059 | 0.322 | 0.804 | 0.714 | 0.806 | 0.713 |
+
+The main conclusion is attack- and behaviour-dependent usefulness, not universal superiority of radio features.
+
+**All-benign false positives.** In the final 300 minutes of fully benign runs, the reported false-positive rates are approximately 0.990 for time-only, 0.589 for cumulative TX/RX, and 0.030 for interval TX/RX. The interval representation substantially reduces the late-stage temporal effect.
+
+**Nested RPL and TX/RX ablation.** Adding interval TX/RX to RPL-10 increases the Blackhole mean F1-score from approximately 0.044 to 0.238. The gain remains limited in absolute terms. TX alone is substantially more informative than RX alone for DIS Flooding, Local Repair, and Blackhole. The effect-size analysis supports stronger and more consistent transmission changes than reception changes.
+
+**Early detection.** For Worst Parent, adding interval TX/RX to the complete RPL representation increases the three-minute detection rate from approximately 0.478 to 0.700, while the all-benign false-positive rate increases from approximately 0.006 to 0.051. Early-detection gains must therefore be considered together with false-positive costs.
+
+**Expected generated files:** The feature generators write per-run node-level and minute-level CSVs, including `node_interval_observations.csv`, `features_temporal_validation_all_bins.csv`, `features_temporal_validation.csv`, `validation_metadata.json`, and `feature_generation_summary.csv`. The exact set depends on the generator and processing stage.
+
+The cross-start-time trainers write the following files under the selected `--output-dir`:
+
+```text
+cross_start_all_runs.csv
+cross_start_summary.csv
+cross_start_overall.csv
+cross_start_f1.png
+```
+
+The nested RPL, reduced RPL, and TX/RX ablation scripts follow the same detailed-run/summary/overall/figure pattern, including `nested_rpl_all_runs.csv`, `nested_rpl_summary.csv`, `nested_rpl_overall.csv`, `nested_rpl_f1.png`, `reduced_rpl_all_runs.csv`, `reduced_rpl_summary.csv`, `reduced_rpl_overall.csv`, `tx_rx_ablation_all_runs.csv`, `tx_rx_ablation_summary.csv`, `tx_rx_ablation_overall.csv`, and `tx_rx_ablation_f1.png`. Early-detection, all-benign, and effect-size scripts produce separate analysis outputs; their exact filenames and optional arguments are defined in their respective source files.
+
+### Interpreting a new run
+
+A successful execution should produce the expected output schema and finite metrics, but numerical agreement with the thesis requires the matching historical protocol and aggregation. The published code-only branch does not include the raw datasets or historical result files. No new experiment was run to generate the reference values above. The thesis itself is the authoritative source for the complete results and methodological limitations.
+
 ## Reproducibility status
 
 Completed checks include the original domain-discovery test, syntax and backup checks for the original path adaptation, and command-line help checks for the controlled feature generators and two cross-start-time trainers.
@@ -139,11 +218,3 @@ Full end-to-end reproduction from a clean machine, complete dependency version p
 ## Contributions and attribution
 
 The thesis-specific work includes modified simulation and data-generation code, radio-feature comparison, cross-domain evaluation, temporal-confounding diagnostics, and controlled validation. The original research-group code and authors' contributions remain attributed to the upstream projects.
-
-## Citation
-
-Please cite the master's thesis and the research group's original work when using this code. Final bibliographic details will be added after confirmation with the supervisor.
-
-## License
-
-The upstream repository contains a BSD-3-Clause license. The licensing status of thesis-specific additions and any applicable research-group requirements should be confirmed before assigning a separate license. This README does not grant additional rights.
