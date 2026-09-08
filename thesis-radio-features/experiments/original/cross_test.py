@@ -14,6 +14,7 @@ import argparse
 import json
 import logging
 import os
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -188,6 +189,12 @@ def parse_args():
         choices=["single", "sweep"],
         required=True
     )
+    default_root = Path(__file__).resolve().parents[2]
+    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--mapping-file", type=Path, default=default_root / "data" / "domain_details.xlsx")
+    parser.add_argument("--run-dir", type=Path, required=True)
+    parser.add_argument("--model-dir", type=Path, required=True,
+                        help="Directory containing the source-domain .pt checkpoints.")
     parser.add_argument("--model_exp", type=int, required=True)
     parser.add_argument("--model_domain", type=str, default=None)
     parser.add_argument("--test_domain", type=str, default="all")
@@ -199,7 +206,21 @@ def parse_args():
     parser.add_argument("--output_size", type=int, default=2)
     parser.add_argument("--num_layers", type=int, default=1)
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    for attr in ("data_dir", "mapping_file", "run_dir", "model_dir"):
+        setattr(args, attr, getattr(args, attr).expanduser().resolve())
+    for attr in ("data_dir", "model_dir"):
+        if not getattr(args, attr).is_dir():
+            parser.error(f"{attr} not found: {getattr(args, attr)}")
+    if not args.mapping_file.is_file():
+        parser.error(f"Mapping file not found: {args.mapping_file}")
+    if args.run_dir == args.data_dir or args.data_dir in args.run_dir.parents:
+        parser.error("--run-dir must not be inside the input data directory")
+    if args.run_dir == args.model_dir or args.model_dir in args.run_dir.parents:
+        parser.error("--run-dir must not be inside the checkpoint directory")
+    if args.run_dir == default_root or args.run_dir == Path(__file__).resolve().parent:
+        parser.error("Choose a separate output directory, not the source directory")
+    return args
 
 
 def main():
@@ -220,11 +241,13 @@ def main():
 
     print(f"Using device: {device}")
 
-    current_dir = os.getcwd()
+    current_dir = str(args.run_dir)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
-    domains_path = os.path.join(os.path.dirname(current_dir), "attack_data")
-    domains = utils.create_domains(domains_path)
+    domains_path = str(args.data_dir)
+    domains = utils.create_domains(domains_path, mapping_file=args.mapping_file)
+    if not domains:
+        raise RuntimeError(f"No domains found in {domains_path}")
 
     if args.test_domain != "all" and args.test_domain not in domains:
         raise ValueError(f"Test domain '{args.test_domain}' not found. Available: {list(domains.keys())}")
@@ -242,8 +265,14 @@ def main():
 
     input_size = num_features * args.window_size
 
-    model_dir = os.path.join(current_dir, "saved_models", f"exp{args.model_exp}")
+    model_dir = str(args.model_dir)
 
+    output_dir = Path(current_dir) / "results" / "cross_test" / f"exp{args.model_exp}"
+    if output_dir.exists() and any(output_dir.rglob("*")):
+        raise RuntimeError(
+            f"Output directory is not empty: {output_dir}. "
+            "Choose a fresh --run-dir to avoid overwriting existing results."
+        )
     if args.mode == "single":
         run_single(args, domains, domains_path, model_dir, feature_cols, input_size, device, current_dir)
     else:

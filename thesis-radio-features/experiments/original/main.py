@@ -4,6 +4,7 @@ import torch
 import os
 import logging
 import datetime
+from pathlib import Path
 
 
 def main():
@@ -19,7 +20,17 @@ def main():
         device = torch.device("cpu")
         print("Using CPU")
 
-    current_directory = os.getcwd()
+    current_directory = str(args.run_dir)
+    domains_path = str(args.data_dir)
+    args.mapping_file = str(args.mapping_file)
+    model_dir = Path(current_directory) / "saved_models" / f"exp{args.exp_no}"
+    results_dir = Path(current_directory) / "results" / f"exp_features_{args.exp_no}"
+    for destination in (model_dir, results_dir):
+        if destination.exists() and any(destination.rglob("*")):
+            raise RuntimeError(
+                f"Output directory is not empty: {destination}. "
+                "Choose a fresh --run-dir to avoid overwriting existing results."
+            )
     exp_no = args.exp_no
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -37,14 +48,15 @@ def main():
     console.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
     logging.getLogger('').addHandler(console)
 
-    domains_path = os.path.join(os.path.dirname(current_directory), 'attack_data')
-    domains = utils.create_domains(domains_path)
+    domains = utils.create_domains(domains_path, mapping_file=args.mapping_file)
 
     if args.domain != "all":
         if args.domain not in domains:
             raise ValueError(f"Domain '{args.domain}' not found. Available: {list(domains.keys())}")
         domains = {args.domain: domains[args.domain]}
 
+    if not domains:
+        raise RuntimeError(f"No domains found in {domains_path}")
     feature_cols = utils.EXPERIMENT_FEATURES[exp_no]
 
     if feature_cols is not None:

@@ -12,6 +12,7 @@ from collections import defaultdict
 import logging
 import argparse
 import sys
+from pathlib import Path
 import re
 
 
@@ -175,8 +176,11 @@ def load_data(domain_path, domain_dataset, window_size=10, batch_size=128, featu
     return train_loader, test_loader
 
 
-def create_domains(domains_path):
-    details_path = os.path.join(os.path.dirname(domains_path), "domain_details.xlsx")
+def create_domains(domains_path, mapping_file=None):
+    details_path = (
+        str(mapping_file) if mapping_file is not None
+        else os.path.join(os.path.dirname(domains_path), "domain_details.xlsx")
+    )
     df = pd.read_excel(details_path)
 
     df.columns = df.columns.str.strip()
@@ -321,7 +325,12 @@ def parse_args():
     parser.add_argument("--entity", type=str, default="sourasb05")
     parser.add_argument("--run_name", type=str, default="experiment-1")
 
-    parser.add_argument("--learning_rate", type=float, default=0.001)
+    default_root = Path(__file__).resolve().parents[2]
+    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--mapping-file", type=Path, default=default_root / "data" / "domain_details.xlsx")
+    parser.add_argument("--run-dir", type=Path, required=True,
+                        help="Fresh output root; existing model/results directories must be empty.")
+    parser.add_argument("--learning_rate",  type=float, default=0.001)
     parser.add_argument("--architecture", type=str, default="LSTM")
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--algorithm", type=str, default="GR")
@@ -398,6 +407,17 @@ def parse_args():
 
     args = parser.parse_args()
 
+    args.data_dir = args.data_dir.expanduser().resolve()
+    args.mapping_file = args.mapping_file.expanduser().resolve()
+    args.run_dir = args.run_dir.expanduser().resolve()
+    if not args.data_dir.is_dir():
+        parser.error(f"Data directory not found: {args.data_dir}")
+    if not args.mapping_file.is_file():
+        parser.error(f"Mapping file not found: {args.mapping_file}")
+    if args.run_dir == args.data_dir or args.data_dir in args.run_dir.parents:
+        parser.error("--run-dir must not be inside the input data directory")
+    if args.run_dir == default_root or args.run_dir == Path(__file__).resolve().parent:
+        parser.error("Choose a separate output directory, not the source directory")
     if args.lambda_min is None:
         args.lambda_min = 0.6 * args.ewc_lambda
 
